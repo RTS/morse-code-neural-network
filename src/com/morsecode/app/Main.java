@@ -29,18 +29,25 @@ public class Main {
 			nn.loadModel(modelFileName);
 			System.out.println("Model loaded from " + modelFileName);
 		} else {
+
 			// Train the neural network
-			int epochs = 10000;
-			for (int epoch = 0; epoch < epochs; epoch++) {
+			int epochs = 1_000_000;
+			for(int epoch = 0; epoch < epochs; epoch++) {
+
+				// learning rate schedule
+				double initialLearningRate = 0.5;
+				double decayRate = 0.0001;
+				nn.setLearningRate(initialLearningRate / (1 + decayRate * epoch));
+
 				double totalError = 0.0;
-				for (int i = 0; i < dataSet.inputs.size(); i++) {
+				for(int i = 0; i < dataSet.inputs.size(); i++) {
 					double[] inputs = dataSet.inputs.get(i);
 					double[] targets = dataSet.outputs.get(i);
 
 					nn.train(inputs, targets);
 
 					double[] outputs = nn.predict(inputs);
-					for (int j = 0; j < targets.length; j++) {
+					for(int j = 0; j < targets.length; j++) {
 						double error = targets[j] - outputs[j];
 						totalError += error * error;
 					}
@@ -58,11 +65,11 @@ public class Main {
 		}
 
 		// Test the neural network with sample Morse codes
-		String[] testMorseCodes = { "-", "....", "..", "...", "..", "...", ".-", "-", ".", "...", "-" };
+		String[] testMorseCodes = {"-", "....", "..", "...", "..", "...", ".-", "-", ".", "...", "-"};
 
 		StringBuilder message = new StringBuilder();
 
-		for (String morseCode : testMorseCodes) {
+		for(String morseCode : testMorseCodes) {
 			double[] inputVector = encodeMorseCode(morseCode);
 			double[] outputVector = nn.predict(inputVector);
 			String predictedLetter = decodeOutput(outputVector);
@@ -78,7 +85,7 @@ public class Main {
 		int maxLength = 5; // Should match the encoding in DataSet
 		double[] vector = new double[maxLength];
 
-		for (int i = 0; i < maxLength; i++) {
+		for(int i = 0; i < maxLength; i++) {
 			if (i < morseCode.length()) {
 				char c = morseCode.charAt(i);
 				if (c == '.') {
@@ -98,7 +105,7 @@ public class Main {
 	private static String decodeOutput(double[] outputVector) {
 		int index = -1;
 		double max = -Double.MAX_VALUE;
-		for (int i = 0; i < outputVector.length; i++) {
+		for(int i = 0; i < outputVector.length; i++) {
 			if (outputVector[i] > max) {
 				max = outputVector[i];
 				index = i;
@@ -110,9 +117,9 @@ public class Main {
 
 	private static String getLetterFromIndex(int index) {
 		if (index >= 0 && index < 26) {
-			return String.valueOf((char) ('A' + index));
+			return String.valueOf((char)('A' + index));
 		} else if (index >= 26 && index < 36) {
-			return String.valueOf((char) ('0' + index - 26));
+			return String.valueOf((char)('0' + index - 26));
 		} else if (index == 35) {
 			return " ";
 		} else {

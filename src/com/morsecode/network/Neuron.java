@@ -10,11 +10,12 @@ public class Neuron {
 	public Neuron(int inputSize, ActivationFunction activationFunction) {
 		this.activationFunction = activationFunction;
 		weights = new double[inputSize];
-		// Initialize weights and bias
+		// Xavier initialization
+		double limit = Math.sqrt(6.0 / (inputSize + 1));
 		for (int i = 0; i < inputSize; i++) {
-			weights[i] = Math.random() - 0.5;
+			weights[i] = (Math.random() * 2 * limit) - limit;
 		}
-		bias = Math.random() - 0.5;
+		bias = 0.0;
 	}
 
 	public double activate(double[] inputs) {

@@ -175,5 +175,9 @@ public class NeuralNetwork {
 			e.printStackTrace();
 		}
 	}
+
+	public void setLearningRate(double learningRate) {
+		this.learningRate = learningRate;
+	}
 }
 
