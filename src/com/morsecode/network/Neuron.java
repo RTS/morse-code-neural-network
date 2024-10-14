@@ -5,10 +5,12 @@ public class Neuron {
 	public double bias;
 	public double output;
 	public double delta;
+	ActivationFunction activationFunction;
 
-	public Neuron(int inputSize) {
+	public Neuron(int inputSize, ActivationFunction activationFunction) {
+		this.activationFunction = activationFunction;
 		weights = new double[inputSize];
-		// Initialize weights and bias with small random values
+		// Initialize weights and bias
 		for (int i = 0; i < inputSize; i++) {
 			weights[i] = Math.random() - 0.5;
 		}
@@ -20,7 +22,7 @@ public class Neuron {
 		for (int i = 0; i < weights.length; i++) {
 			sum += weights[i] * inputs[i];
 		}
-		output = ActivationFunction.sigmoid(sum);
+		output = activationFunction.activate(sum);
 		return output;
 	}
 }
