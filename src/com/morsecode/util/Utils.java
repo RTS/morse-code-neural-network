@@ -1,6 +1,15 @@
 package com.morsecode.util;
 
+import com.morsecode.activation.ActivationFunction;
+import com.morsecode.activation.ReLUActivation;
+import com.morsecode.activation.SigmoidActivation;
+import com.morsecode.activation.TanhActivation;
+import com.morsecode.initialization.InitializationFunction;
+import com.morsecode.initialization.LeCunInitialization;
+import com.morsecode.initialization.XavierInitialization;
+
 public class Utils {
+
 	public static double[] encodeMorseCode(String morseCode, int maxLength) {
 		double[] vector = new double[maxLength];
 
@@ -44,5 +53,22 @@ public class Utils {
 		} else {
 			return "?";
 		}
+	}
+
+	public static ActivationFunction getActivationFunctionByName(String name) {
+		return switch(name) {
+			case "SigmoidActivation" -> new SigmoidActivation();
+			case "ReLUActivation" -> new ReLUActivation();
+			case "TanhActivation" -> new TanhActivation();
+			default -> throw new IllegalArgumentException("Unknown activation function: " + name);
+		};
+	}
+
+	public static InitializationFunction getInitializationFunctionByName(String name) {
+		return switch(name) {
+			case "XavierInitialization" -> new XavierInitialization();
+			case "LeCunInitialization" -> new LeCunInitialization();
+			default -> throw new IllegalArgumentException("Unknown initialization function: " + name);
+		};
 	}
 }

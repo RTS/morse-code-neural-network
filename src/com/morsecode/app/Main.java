@@ -1,37 +1,42 @@
 package com.morsecode.app;
 
-import com.morsecode.data.DataSet;
+import com.morsecode.ModelPersistence;
+import com.morsecode.activation.SigmoidActivation;
+import com.morsecode.data.MorseCodeDataSet;
+import com.morsecode.initialization.XavierInitialization;
 import com.morsecode.network.NeuralNetwork;
-import com.morsecode.network.SigmoidActivation;
+import com.morsecode.util.Utils;
 
 import java.io.File;
 
 public class Main {
+
 	public static void main(String[] args) {
+
 		// Initialize the dataset
-		DataSet dataSet = new DataSet();
+		MorseCodeDataSet dataSet = new MorseCodeDataSet();
 
 		// Create and configure the neural network
 		NeuralNetwork nn = new NeuralNetwork(0.5); // Learning rate set to 0.5
 
 		// Configure the neural network layers
-		nn.addLayer(5, new SigmoidActivation());    // Input layer with 5 neurons
-		nn.addLayer(20, new SigmoidActivation());   // Hidden layer with 20 neurons
-		nn.addLayer(36, new SigmoidActivation());   // Output layer with 36 neurons
+		nn.addLayer(5, new SigmoidActivation(), new XavierInitialization());    // Input layer with 5 neurons
+		nn.addLayer(20, new SigmoidActivation(), new XavierInitialization());   // Hidden layer with 20 neurons
+		nn.addLayer(36, new SigmoidActivation(), new XavierInitialization());   // Output layer with 36 neurons
 
 		// Generate model file name based on the network structure
-		String modelFileName = nn.generateModelFileName();
+		String modelFileName = ModelPersistence.generateModelFileName(nn);
 
 		// Check if model file exists
 		File modelFile = new File(modelFileName);
 		if (modelFile.exists()) {
 			// Load the model
-			nn.loadModel(modelFileName);
+			ModelPersistence.loadModel(modelFileName, nn);
 			System.out.println("Model loaded from " + modelFileName);
 		} else {
 
 			// Train the neural network
-			int epochs = 1_000_000;
+			int epochs = 10_000;
 			for(int epoch = 0; epoch < epochs; epoch++) {
 
 				// learning rate schedule
@@ -59,7 +64,7 @@ public class Main {
 			}
 
 			// Save the model after training
-			nn.saveModel(modelFileName);
+			ModelPersistence.saveModel(modelFileName, nn);
 			System.out.println("Current working directory: " + System.getProperty("user.dir"));
 			System.out.println("Model saved to " + modelFileName);
 		}
@@ -70,9 +75,9 @@ public class Main {
 		StringBuilder message = new StringBuilder();
 
 		for(String morseCode : testMorseCodes) {
-			double[] inputVector = encodeMorseCode(morseCode);
+			double[] inputVector = Utils.encodeMorseCode(morseCode, 5);
 			double[] outputVector = nn.predict(inputVector);
-			String predictedLetter = decodeOutput(outputVector);
+			String predictedLetter = Utils.decodeOutput(outputVector);
 
 			message.append(predictedLetter);
 			System.out.println("Morse Code: " + morseCode + " -> Predicted Letter: " + predictedLetter);
@@ -81,49 +86,4 @@ public class Main {
 		System.out.println("Decoded Message: " + message.toString());
 	}
 
-	private static double[] encodeMorseCode(String morseCode) {
-		int maxLength = 5; // Should match the encoding in DataSet
-		double[] vector = new double[maxLength];
-
-		for(int i = 0; i < maxLength; i++) {
-			if (i < morseCode.length()) {
-				char c = morseCode.charAt(i);
-				if (c == '.') {
-					vector[i] = 1.0;
-				} else if (c == '-') {
-					vector[i] = -1.0;
-				} else {
-					vector[i] = 0.0;
-				}
-			} else {
-				vector[i] = 0.0; // Padding
-			}
-		}
-		return vector;
-	}
-
-	private static String decodeOutput(double[] outputVector) {
-		int index = -1;
-		double max = -Double.MAX_VALUE;
-		for(int i = 0; i < outputVector.length; i++) {
-			if (outputVector[i] > max) {
-				max = outputVector[i];
-				index = i;
-			}
-		}
-
-		return getLetterFromIndex(index);
-	}
-
-	private static String getLetterFromIndex(int index) {
-		if (index >= 0 && index < 26) {
-			return String.valueOf((char)('A' + index));
-		} else if (index >= 26 && index < 36) {
-			return String.valueOf((char)('0' + index - 26));
-		} else if (index == 35) {
-			return " ";
-		} else {
-			return "?";
-		}
-	}
 }

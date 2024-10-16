@@ -1,29 +1,68 @@
 package com.morsecode.network;
 
-public class Neuron {
-	public double[] weights;
-	public double bias;
-	public double output;
-	public double delta;
-	ActivationFunction activationFunction;
+import com.morsecode.activation.ActivationFunction;
 
-	public Neuron(int inputSize, ActivationFunction activationFunction) {
+public class Neuron {
+
+	private double[] weights;
+	private double bias;
+	private double output;
+	private double delta;
+	private ActivationFunction activationFunction;
+
+	public double[] getWeights() {
+		return weights;
+	}
+
+	public void setWeights(double[] weights) {
+		this.weights = weights;
+	}
+
+	public double getBias() {
+		return bias;
+	}
+
+	public void setBias(double bias) {
+		this.bias = bias;
+	}
+
+	public double getOutput() {
+		return output;
+	}
+
+	public void setOutput(double output) {
+		this.output = output;
+	}
+
+	public double getDelta() {
+		return delta;
+	}
+
+	public void setDelta(double delta) {
+		this.delta = delta;
+	}
+
+	public ActivationFunction getActivationFunction() {
+		return activationFunction;
+	}
+
+	public void setActivationFunction(ActivationFunction activationFunction) {
 		this.activationFunction = activationFunction;
-		weights = new double[inputSize];
-		// Xavier initialization
-		double limit = Math.sqrt(6.0 / (inputSize + 1));
-		for (int i = 0; i < inputSize; i++) {
-			weights[i] = (Math.random() * 2 * limit) - limit;
-		}
-		bias = 0.0;
+	}
+
+	public Neuron(double[] weights, double bias, ActivationFunction activationFunction) {
+		this.weights = weights;
+		this.bias = bias;
+		this.activationFunction = activationFunction;
 	}
 
 	public double activate(double[] inputs) {
 		double sum = bias;
-		for (int i = 0; i < weights.length; i++) {
+		for(int i = 0; i < weights.length; i++) {
 			sum += weights[i] * inputs[i];
 		}
 		output = activationFunction.activate(sum);
 		return output;
 	}
+
 }

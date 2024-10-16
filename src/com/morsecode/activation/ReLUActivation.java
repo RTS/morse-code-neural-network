@@ -1,6 +1,7 @@
-package com.morsecode.network;
+package com.morsecode.activation;
 
 public class ReLUActivation implements ActivationFunction {
+
 	@Override
 	public double activate(double x) {
 		return Math.max(0, x);
