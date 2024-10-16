@@ -1,9 +1,11 @@
-package com.morsecode.app;
+package com.morsecode;
 
-import com.morsecode.ModelPersistence;
 import com.morsecode.activation.SigmoidActivation;
 import com.morsecode.data.MorseCodeDataSet;
+import com.morsecode.decay.DecayFunction;
+import com.morsecode.decay.InverseTimeDecay;
 import com.morsecode.initialization.XavierInitialization;
+import com.morsecode.model.ModelPersistence;
 import com.morsecode.network.NeuralNetwork;
 import com.morsecode.util.Utils;
 
@@ -32,46 +34,22 @@ public class Main {
 		if (modelFile.exists()) {
 			// Load the model
 			ModelPersistence.loadModel(modelFileName, nn);
-			System.out.println("Model loaded from " + modelFileName);
 		} else {
 
 			// Train the neural network
 			int epochs = 10_000;
-			for(int epoch = 0; epoch < epochs; epoch++) {
-
-				// learning rate schedule
-				double initialLearningRate = 0.5;
-				double decayRate = 0.0001;
-				nn.setLearningRate(initialLearningRate / (1 + decayRate * epoch));
-
-				double totalError = 0.0;
-				for(int i = 0; i < dataSet.inputs.size(); i++) {
-					double[] inputs = dataSet.inputs.get(i);
-					double[] targets = dataSet.outputs.get(i);
-
-					nn.train(inputs, targets);
-
-					double[] outputs = nn.predict(inputs);
-					for(int j = 0; j < targets.length; j++) {
-						double error = targets[j] - outputs[j];
-						totalError += error * error;
-					}
-				}
-
-				if (epoch % 1000 == 0) {
-					System.out.println("Epoch " + epoch + ", Error: " + totalError);
-				}
-			}
+			train(epochs, nn, new InverseTimeDecay(0.5, 0.0001), dataSet);
 
 			// Save the model after training
 			ModelPersistence.saveModel(modelFileName, nn);
-			System.out.println("Current working directory: " + System.getProperty("user.dir"));
-			System.out.println("Model saved to " + modelFileName);
 		}
 
 		// Test the neural network with sample Morse codes
 		String[] testMorseCodes = {"-", "....", "..", "...", "..", "...", ".-", "-", ".", "...", "-"};
+		test(testMorseCodes, nn);
+	}
 
+	private static void test(String[] testMorseCodes, NeuralNetwork nn) {
 		StringBuilder message = new StringBuilder();
 
 		for(String morseCode : testMorseCodes) {
@@ -82,8 +60,33 @@ public class Main {
 			message.append(predictedLetter);
 			System.out.println("Morse Code: " + morseCode + " -> Predicted Letter: " + predictedLetter);
 		}
+		System.out.println("Decoded Message: " + message);
+	}
 
-		System.out.println("Decoded Message: " + message.toString());
+	private static void train(int epochs, NeuralNetwork nn, DecayFunction decayFunction, MorseCodeDataSet dataSet) {
+		for(int epoch = 0; epoch < epochs; epoch++) {
+
+			// learning rate schedule
+			nn.setLearningRate(decayFunction.getLearningRate(epoch));
+
+			double totalError = 0.0;
+			for(int i = 0; i < dataSet.inputs.size(); i++) {
+				double[] inputs = dataSet.inputs.get(i);
+				double[] targets = dataSet.outputs.get(i);
+
+				nn.train(inputs, targets);
+
+				double[] outputs = nn.predict(inputs);
+				for(int j = 0; j < targets.length; j++) {
+					double error = targets[j] - outputs[j];
+					totalError += error * error;
+				}
+			}
+
+			if (epoch % 1000 == 0) {
+				System.out.println("Epoch " + epoch + ", Error: " + totalError);
+			}
+		}
 	}
 
 }

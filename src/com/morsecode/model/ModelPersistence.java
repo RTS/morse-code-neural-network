@@ -1,4 +1,4 @@
-package com.morsecode;
+package com.morsecode.model;
 
 import com.morsecode.activation.ActivationFunction;
 import com.morsecode.initialization.InitializationFunction;
@@ -66,6 +66,8 @@ public class ModelPersistence {
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
+		System.out.println("Current working directory: " + System.getProperty("user.dir"));
+		System.out.println("Model saved to " + fileName);
 	}
 
 	public static void loadModel(String fileName, NeuralNetwork neuralNetwork) {
@@ -139,5 +141,7 @@ public class ModelPersistence {
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
+
+		System.out.println("Model loaded from " + fileName);
 	}
 }

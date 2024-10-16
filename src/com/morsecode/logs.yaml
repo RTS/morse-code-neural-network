@@ -1,0 +1,15 @@
+NeuralNetwork:
+  learningRate
+  layersCount
+
+Layer:
+  neuronCount
+  activationFunction
+  initializationFunction
+
+Neuron:
+  activationFunction
+
+Training:
+  epochs
+  decayFunction
